@@ -397,12 +397,12 @@ function startGameWithDifficulty(mode) {
   currentPath = [];
   energy = MAX_ENERGY;
   if (mode === "easy") {
-    dropRate = 1.5;
-    dropSpeedForDifficulty = 4;
+    dropRate = 0.5;
+    dropSpeedForDifficulty = 2;
     playerSpeed = 1.5; // Increased initial speed
   } else if (mode === "medium") {
     dropRate = 1.5;
-    dropSpeedForDifficulty = 4.5;
+    dropSpeedForDifficulty = 3.5;
     playerSpeed = 1.0;
   } else if (mode === "hard") {
     dropRate = 3;
