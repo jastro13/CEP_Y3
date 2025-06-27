@@ -5,16 +5,18 @@ const GRID_ROWS = 12;
 const GRID_COLS = 16;
 const NODE_SPACING_X = WIDTH / GRID_COLS;
 const NODE_SPACING_Y = HEIGHT / GRID_ROWS;
+const GRAVITY = 0.2; // Adjust this value for stronger/weaker gravity
+
 
 let nodes = [];
 let droppers = [];
 let startNodeIdx = 0;
-let endNodeIdx; // User set end node by right click (default: bottom-right), bottom-right to win
+let endNodeIdx; 
 let bottomRightIdx;
 let gameStarted = false;
 let gameOver = false;
 let win = false;
-let dropRate = 1; // drops per second approx
+let dropRate = 1;
 let dropAccumulator = 0;
 let player = null;
 let startTime = 0;
@@ -22,9 +24,9 @@ let currentPath = [];
 let finalScore = 0;
 
 // Energy system
-const MAX_ENERGY = 15; // has been reduced to make energy lose more quickly
+const MAX_ENERGY = 15; 
 let energy = MAX_ENERGY;
-const ENERGY_GAIN_PER_BALL = 15; // energy gained when shift-click on falling ball
+const ENERGY_GAIN_PER_BALL = 15; 
 
 // Difficulty params (updated on startGameWithDifficulty)
 let dropSpeedForDifficulty = 4;
@@ -91,12 +93,20 @@ function draw() {
     drop.update();
     drop.draw();
     for (let node of nodes) {
-      if (node.neighbors.length === 0) continue;
-      let d = p5.Vector.dist(drop.pos, node.pos);
-      if (d < drop.radius + node.radius) {
-        node.neighbors = [];
-      }
+    let d = p5.Vector.dist(drop.pos, node.pos);
+    if (d < drop.radius + node.radius) {
+        // Ball bounces on node
+        let direction = p5.Vector.sub(drop.pos, node.pos).normalize();
+        drop.pos = p5.Vector.add(
+            node.pos,
+            direction.mult(drop.radius + node.radius + 1)
+        );
+        drop.vel.y *= -1;
+        // Optionally dampen the bounce:
+        // drop.vel.y *= 0.8;
     }
+}
+
     for (let iPath = player.pathIndex; iPath < currentPath.length; iPath++) {
       let nodeIdx = currentPath[iPath];
       if (nodes[nodeIdx].neighbors.length === 0) {
@@ -343,18 +353,15 @@ function mousePressed() {
         droppers.splice(i, 1);
         energy += ENERGY_GAIN_PER_BALL;
         energy = constrain(energy, 0, MAX_ENERGY);
-
-        // Apply random upward impulse to player
         if (player) {
           let impulse = createVector(random(-1, 1), random(-2, -1));
           player.applyForce(impulse.mult(3));
         }
-        return; // Only collect one drop per click
+        return; 
       }
     }
   }
 
-  // Find nearest node to mouse click position
   let minDist = Infinity,
     nearestIdx = -1;
   for (let i = 0; i < nodes.length; i++) {
@@ -367,7 +374,6 @@ function mousePressed() {
   if (nearestIdx === -1) return;
 
   if (mouseButton === LEFT) {
-    // Prevent setting start node to bottom-right node (cheat code)
     if (nearestIdx === bottomRightIdx) {
       return;
     }
@@ -460,7 +466,9 @@ class PlayerNode {
     this.path = [];
     this.pos = nodes[startNodeIdx].pos.copy();
     this.speed = speed;
-    this.vel = createVector(0, 0);
+    let vx = random(-2, 2); // Adjust range for more or less sideways motion
+this.vel = createVector(vx, this.speed);
+
     this.energy = MAX_ENERGY;
   }
 
@@ -517,11 +525,21 @@ class DropParticle {
     this.pos = createVector(random(WIDTH), -10);
     this.radius = 10;
     this.speed = speed;
-    this.vel = createVector(0, this.speed);
+    let vx = random(-2, 2); // random left/right motion
+    this.vel = createVector(vx, this.speed);
   }
+
+
   update() {
-    this.pos.add(this.vel);
-  }
+  this.vel.y += GRAVITY;
+  this.vel.x += random(-0.1, 0.1);
+
+  // limit the max horizontal speed
+  this.vel.x = constrain(this.vel.x, -3, 3);
+
+  this.pos.add(this.vel);
+}
+
   draw() {
     noStroke();
     fill(255, 50, 50);
