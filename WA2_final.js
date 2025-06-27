@@ -107,7 +107,7 @@ function draw() {
             direction.mult(drop.radius + node.radius + 1)
         );
         drop.vel.y *= -1;
-      if (bounceSound && !bounceSound.isPlaying()) {
+      if (bounceSound ){ //&& //!bounceSound.isPlaying()) {
         bounceSound.play();
       }
     }
