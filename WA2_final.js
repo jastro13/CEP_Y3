@@ -22,6 +22,12 @@ let player = null;
 let startTime = 0;
 let currentPath = [];
 let finalScore = 0;
+let bounceSound;
+
+function preload() {
+  soundFormats('mp3', 'ogg');
+  bounceSound = loadSound('bounce.mp3');
+}
 
 // Energy system
 const MAX_ENERGY = 15; 
@@ -95,15 +101,15 @@ function draw() {
     for (let node of nodes) {
     let d = p5.Vector.dist(drop.pos, node.pos);
     if (d < drop.radius + node.radius) {
-        // Ball bounces on node
         let direction = p5.Vector.sub(drop.pos, node.pos).normalize();
         drop.pos = p5.Vector.add(
             node.pos,
             direction.mult(drop.radius + node.radius + 1)
         );
         drop.vel.y *= -1;
-        // Optionally dampen the bounce:
-        // drop.vel.y *= 0.8;
+      if (bounceSound && !bounceSound.isPlaying()) {
+        bounceSound.play();
+      }
     }
 }
 
