@@ -34,7 +34,7 @@ const MAX_ENERGY = 15;
 let energy = MAX_ENERGY;
 const ENERGY_GAIN_PER_BALL = 15; 
 
-// Difficulty params (updated on startGameWithDifficulty)
+// Difficulty params 
 let dropSpeedForDifficulty = 4;
 let playerSpeed = 1;
 
